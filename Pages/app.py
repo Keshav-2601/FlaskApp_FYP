@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from flask import request,jsonify
+from flask import request,jsonify,Response
 
 from dotenv import load_dotenv
 from email_validator import validate_email, EmailNotValidError
@@ -8,7 +8,7 @@ from Pages.extension import db,bcrypt,migrate,jwt_manager
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 from Model.User import User
-
+from Pages import dataclean
 import os
 
 
@@ -76,6 +76,17 @@ def login():
 
    return jsonify({"response":"correct credential hence login successfully!!","token":myjwttoken}),200
    
+@app.get("/vsm")
+def getvsmdata():
+   if not(request.headers.get("X-QueryParam")):
+     return jsonify({"error": "Missing X-QueryParam header"}), 400
+   try:
+      header_query=request.headers.get("X-QueryParam")
+      Result=dataclean.getVsm(header_query)
+      return Result
+   except Exception as e:
+        print("ERROR:", repr(e))
+        return jsonify({"error": str(e)}), 500
 
 
 def validEmail(email):
